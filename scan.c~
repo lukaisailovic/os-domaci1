@@ -108,13 +108,13 @@ int process_scancode(int scancode, char *buffer)
             "jmp EXIT;"
             
             // alt down
-            "ALT_DOWN_HANDLE:;"
-            "movl $1, (alt);"
+            "CTRL_DOWN_HANDLE:;"
+            "movl $1, (ctrl);"
             "jmp EXIT;"
             
             // alt up
-            "ALT_UP_HANDLE:;"
-            "movl $0, (alt);"
+            "CTRL_UP_HANDLE:;"
+            "movl $0, (ctrl);"
             "jmp EXIT;"
             
             // ===== end handlers =====
