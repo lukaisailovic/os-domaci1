@@ -18,6 +18,8 @@ int shift = 0;
 int ctrl = 0;
 int alt = 0;
 
+
+int MAX_SCANCODES_C = MAX_SCANCODES;
 int SHIFT_DOWN = 200;
 int SHIFT_UP = 300;
 int CTRL_DOWN = 201;
@@ -43,7 +45,7 @@ void load_config(const char *scancodes_filename, const char *mnemonic_filename)
 
 int process_scancode(int scancode, char *buffer)
 {
-    if(DEBUG){
+    if(0){
          printstr("Processing scancode ");
          char tmp_buff[BUFFER_SIZE];
          int len = itoa(scancode,tmp_buff);
@@ -83,6 +85,11 @@ int process_scancode(int scancode, char *buffer)
             
             // ===== end special codes =====
             
+            // ===== standard chars =====
+            "cmp (MAX_SCANCODES_C), %%eax;"
+            "jle STANDARD_CHAR_HANDLE;"
+            // ===== end standard chars =====
+            
             "jmp EXIT;"
             
             // ===== handlers =====
@@ -117,6 +124,11 @@ int process_scancode(int scancode, char *buffer)
             "movl $0, (alt);"
             "jmp EXIT;"
             
+            // standard chars
+            "STANDARD_CHAR_HANDLE:;"
+            "movl %%eax, %%ebx;"
+            "jmp EXIT;"
+            
             // ===== end handlers =====
             
             //done
@@ -131,7 +143,7 @@ int process_scancode(int scancode, char *buffer)
 		Remember, only inline assembly.
 		Good luck!
 	*/
-    vardump(shift);
+    vardump(result);
 	return result;
 }
 
