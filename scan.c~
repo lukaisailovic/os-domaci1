@@ -126,7 +126,8 @@ int process_scancode(int scancode, char *buffer)
             
             // standard chars
             "STANDARD_CHAR_HANDLE:;"
-            "movl %%eax, %%ebx;"
+            "leal (scancodes_lower), %%ebx;"
+            
             "jmp EXIT;"
             
             // ===== end handlers =====
@@ -134,7 +135,7 @@ int process_scancode(int scancode, char *buffer)
             //done
             "EXIT:;"          
             : "=b" (result)
-            : "a" (scancode), "d" (shift)
+            : "a" (scancode), "b" (buffer)
             : "%ecx","memory"
         );
 
@@ -143,75 +144,10 @@ int process_scancode(int scancode, char *buffer)
 		Remember, only inline assembly.
 		Good luck!
 	*/
-    vardump(result);
+    vardump(strlen(buffer));
+    printstr("\n");
 	return result;
 }
 
-void load_scancodes(const char *scancodes_filename){
-    int len;
-	char buffer[BUFFER_SIZE];
-	/*
-	Otvaranje i ucitavanje scancodes fajla
-	*/
-	int fd = open(scancodes_filename, O_RDONLY);
-	if(fd == -1)
-	{
-		printerr("Fajl neuspesno otvoren!\n");
-		_exit(1);
-	} else {
-		printstr("Scancodes fajl ucitan\n");
-	}
-	len = fgets(scancodes_lower, MAX_SCANCODES, fd);
-	len = fgets(scancodes_upper, MAX_SCANCODES, fd);
-    // scancodes loading test
-	if(DEBUG){
-        newline();
-        printstr("SCANCODES TEST\n");
-        printstr(scancodes_lower);
-        printstr(scancodes_upper);
-        newline();
-	}
-	close(fd);
-}
 
-void load_mnemonic(const char *mnemonic_filename){
-    int len;
-    char buffer[BUFFER_SIZE];
-	/*
-	Otvaranje i ucitavanje mnemonics
-	*/
-    int fd = open(mnemonic_filename, O_RDONLY);
-    if(fd == -1)
-	{
-		printerr("Fajl neuspesno otvoren!\n");
-		_exit(1);
-	} else {
-		printstr("Mnemonic fajl ucitan\n");
-	}
-    len = fgets(buffer,BUFFER_SIZE,fd);
-    int n = atoi(buffer);
-	if(n > MAX_MNEMONICS)
-	{
-		printerr("Uneti broj mnemonica nije podrzan\n");
-		_exit(1);
-	}
-	int i = 0;
-	for(i; i < n; i++)
-	{
-		len = fgets(mnemonics[i], BUFFER_SIZE, fd);
-	}
-
-	// mnemonics loading test
-	if(DEBUG){
-        newline();
-        printstr("MNEMONIC TEST\n");
-        i = 0;
-        for(i; i < n; i++)
-        {
-            printstr(mnemonics[i]);
-        }
-        newline();
-	}
-	close(fd);
-}
 

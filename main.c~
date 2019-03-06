@@ -54,10 +54,9 @@ int main(int argc, char *argv[])
         x = atoi(buffer);
         scancodes[i] = x;
         buffer[0] = 0;
-        sc_buffer[0] = 0;
-        process_scancode(x,sc_buffer);
-
-
+        process_scancode(x,&sc_buffer);
+        printstr(sc_buffer);
+        pause();
 
         if(x == 400){
             if(DEBUG){

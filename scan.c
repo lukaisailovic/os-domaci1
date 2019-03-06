@@ -19,6 +19,7 @@ int ctrl = 0;
 int alt = 0;
 
 
+
 int MAX_SCANCODES_C = MAX_SCANCODES;
 int SHIFT_DOWN = 200;
 int SHIFT_UP = 300;
@@ -34,118 +35,6 @@ int ALT_UP = 302;
 	ih uz pomoc funkcije load_config
 
 */
-
-void load_config(const char *scancodes_filename, const char *mnemonic_filename)
-{
-
-    load_scancodes(scancodes_filename);
-    load_mnemonic(mnemonic_filename);
-
-}
-
-int process_scancode(int scancode, char *buffer)
-{
-    if(0){
-         printstr("Processing scancode ");
-         char tmp_buff[BUFFER_SIZE];
-         int len = itoa(scancode,tmp_buff);
-         printstr(tmp_buff)
-         newline();
-    }
-
-
-	int result;
-
-     __asm__ __volatile__(
-            // ===== special codes =====
-            
-            //check shift down
-            "cmp (SHIFT_DOWN), %%eax;"
-            "je SHIFT_DOWN_HANDLE;"
-            
-            //check shift up
-            "cmp (SHIFT_UP), %%eax;"
-            "je SHIFT_UP_HANDLE;"
-            
-            //check ctrl down
-            "cmp (CTRL_DOWN), %%eax;"
-            "je CTRL_DOWN_HANDLE;"
-            
-            //check ctrl up
-            "cmp (CTRL_UP), %%eax;"
-            "je CTRL_UP_HANDLE;"
-            
-            //check alt down
-            "cmp (ALT_DOWN), %%eax;"
-            "je ALT_DOWN_HANDLE;"
-            
-            //check alt up
-            "cmp (ALT_UP), %%eax;"
-            "je ALT_UP_HANDLE;"
-            
-            // ===== end special codes =====
-            
-            // ===== standard chars =====
-            "cmp (MAX_SCANCODES_C), %%eax;"
-            "jle STANDARD_CHAR_HANDLE;"
-            // ===== end standard chars =====
-            
-            "jmp EXIT;"
-            
-            // ===== handlers =====
-            
-            // shift down
-            "SHIFT_DOWN_HANDLE:;"
-            "movl $1, (shift);"
-            "jmp EXIT;"
-            
-            // shift up
-            "SHIFT_UP_HANDLE:;"
-            "movl $0, (shift);"
-            "jmp EXIT;"
-            
-            // ctrl down
-            "CTRL_DOWN_HANDLE:;"
-            "movl $1, (ctrl);"
-            "jmp EXIT;"
-            
-            // ctrl up
-            "CTRL_UP_HANDLE:;"
-            "movl $0, (ctrl);"
-            "jmp EXIT;"
-            
-            // alt down
-            "ALT_DOWN_HANDLE:;"
-            "movl $1, (alt);"
-            "jmp EXIT;"
-            
-            // alt up
-            "ALT_UP_HANDLE:;"
-            "movl $0, (alt);"
-            "jmp EXIT;"
-            
-            // standard chars
-            "STANDARD_CHAR_HANDLE:;"
-            "movl %%eax, %%ebx;"
-            "jmp EXIT;"
-            
-            // ===== end handlers =====
-            
-            //done
-            "EXIT:;"          
-            : "=b" (result)
-            : "a" (scancode), "d" (shift)
-            : "%ecx","memory"
-        );
-
-	/*
-		Your code goes here!
-		Remember, only inline assembly.
-		Good luck!
-	*/
-    vardump(result);
-	return result;
-}
 
 void load_scancodes(const char *scancodes_filename){
     int len;
@@ -214,4 +103,158 @@ void load_mnemonic(const char *mnemonic_filename){
 	}
 	close(fd);
 }
+
+void load_config(const char *scancodes_filename, const char *mnemonic_filename)
+{
+
+    load_scancodes(scancodes_filename);
+    load_mnemonic(mnemonic_filename);
+
+}
+
+int process_scancode(int scancode, char *buffer)
+{
+    if(0){
+         printstr("Processing scancode ");
+         char tmp_buff[BUFFER_SIZE];
+         int len = itoa(scancode,tmp_buff);
+         printstr(tmp_buff)
+         newline();
+    }
+
+
+	int result;
+
+     __asm__ __volatile__(
+
+            // ===== special codes =====
+
+            //check shift down
+            "cmpl (SHIFT_DOWN), %%eax;"
+            "je SHIFT_DOWN_HANDLE;"
+
+            //check shift up
+            "cmp (SHIFT_UP), %%eax;"
+            "je SHIFT_UP_HANDLE;"
+
+            //check ctrl down
+            "cmp (CTRL_DOWN), %%eax;"
+            "je CTRL_DOWN_HANDLE;"
+
+            //check ctrl up
+            "cmp (CTRL_UP), %%eax;"
+            "je CTRL_UP_HANDLE;"
+
+            //check alt down
+            "cmp (ALT_DOWN), %%eax;"
+            "je ALT_DOWN_HANDLE;"
+
+            //check alt up
+            "cmp (ALT_UP), %%eax;"
+            "je ALT_UP_HANDLE;"
+
+            // ===== end special codes =====
+
+            // ===== standard chars =====
+            "cmp (MAX_SCANCODES_C), %%eax;"
+            "jle STANDARD_CHAR_HANDLE;"
+            // ===== end standard chars =====
+
+            "jmp EXIT;"
+
+            // ===== handlers =====
+
+            // shift down
+            "SHIFT_DOWN_HANDLE:;"
+            "movl $1, (shift);"
+            "xorl %%edx, %%edx;"
+            "jmp EXIT;"
+
+            // shift up
+            "SHIFT_UP_HANDLE:;"
+            "movl $0, (shift);"
+            "xorl %%edx, %%edx;"
+            "jmp EXIT;"
+
+            // ctrl down
+            "CTRL_DOWN_HANDLE:;"
+            "movl $1, (ctrl);"
+            "xorl %%edx, %%edx;"
+            "jmp EXIT;"
+
+            // ctrl up
+            "CTRL_UP_HANDLE:;"
+            "movl $0, (ctrl);"
+            "xorl %%edx, %%edx;"
+            "jmp EXIT;"
+
+            // alt down
+            "ALT_DOWN_HANDLE:;"
+            "movl $1, (alt);"
+            "xorl %%edx, %%edx;"
+            "jmp EXIT;"
+
+            // alt up
+            "ALT_UP_HANDLE:;"
+            "movl $0, (alt);"
+            "xorl %%edx, %%edx;"
+            "jmp EXIT;"
+
+            // standard chars
+            "STANDARD_CHAR_HANDLE:;"
+            // check if alt,ctrl and shift are NOT PRESSED
+            "xorl %%ecx, %%ecx;"
+            "add (alt), %%ecx;"
+            "add (ctrl), %%ecx;"
+            "add (shift), %%ecx;"
+            "cmp $0, %%ecx;"
+            "je LOWERCASE_CHAR_HANDLE;"
+            "jmp EXIT;"
+            // none of the chars are pressed
+
+            // put scancodes_lower + ax value in di
+            "LOWERCASE_CHAR_HANDLE:;"
+                    //only return one char
+            "movl $1, %%edx;"
+                    // ld from scancodes_lower to si
+            "cld;"
+            "leal (scancodes_lower), %%esi;"
+            "addl %%eax, %%esi;"
+            "lodsb;"
+
+
+                    // cpy from ax to buff
+            "cld;"
+            //"movl $65, %%eax;"
+            "stosl;"
+            "jmp EXIT;"
+
+            // ===== end handlers =====
+
+            //done
+            "EXIT:;"
+
+            : "=d" (result)
+            : "a" (scancode), "D" (buffer)
+            : "%ecx","memory"
+        );
+
+
+	vardump(scancode);
+	vardump(result);
+	//write(1,buffer,result);
+	printstr("Char: ");
+	printstr(buffer);
+	newline();
+	/*
+    vardump(scancode);
+    vardump(shift);
+    vardump(alt);
+    vardump(ctrl);
+    */
+
+	return result;
+}
+
+
 
