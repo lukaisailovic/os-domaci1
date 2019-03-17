@@ -208,9 +208,13 @@ int process_scancode(int scancode, char *buffer)
             "add (ctrl), %%ecx;"
             "add (shift), %%ecx;"
             "cmp $0, %%ecx;"
-            "je LOWERCASE_CHAR_HANDLE;"
-            "jmp EXIT;"
             // none of the chars are pressed
+            "je LOWERCASE_CHAR_HANDLE;"
+            "cmp $1, (shift);"
+            // check if shift is pressed
+            "je UPPERCASE_CHAR_HANDLE;"
+            "jmp EXIT;"
+
 
             // put scancodes_lower + ax value in di
             "LOWERCASE_CHAR_HANDLE:;"
@@ -221,11 +225,22 @@ int process_scancode(int scancode, char *buffer)
             "leal (scancodes_lower), %%esi;"
             "addl %%eax, %%esi;"
             "lodsb;"
-
-
                     // cpy from ax to buff
             "cld;"
-            //"movl $65, %%eax;"
+            "stosl;"
+            "jmp EXIT;"
+
+            // put scancodes_lower + ax value in di
+            "UPPERCASE_CHAR_HANDLE:;"
+                    //only return one char
+            "movl $1, %%edx;"
+                    // ld from scancodes_lower to si
+            "cld;"
+            "leal (scancodes_upper), %%esi;"
+            "addl %%eax, %%esi;"
+            "lodsb;"
+                    // cpy from ax to buff
+            "cld;"
             "stosl;"
             "jmp EXIT;"
 
@@ -240,12 +255,12 @@ int process_scancode(int scancode, char *buffer)
         );
 
 
-	vardump(scancode);
-	vardump(result);
+	//vardump(scancode);
+	//vardump(result);
 	//write(1,buffer,result);
-	printstr("Char: ");
+	//printstr("Char: ");
 	printstr(buffer);
-	newline();
+	//newline();
 	/*
     vardump(scancode);
     vardump(shift);
