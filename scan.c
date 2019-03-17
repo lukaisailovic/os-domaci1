@@ -18,7 +18,7 @@ int shift = 0;
 int ctrl = 0;
 int alt = 0;
 
-
+int ascii_val = 0;
 
 int MAX_SCANCODES_C = MAX_SCANCODES;
 int SHIFT_DOWN = 200;
@@ -196,24 +196,41 @@ int process_scancode(int scancode, char *buffer)
 
             // alt up
             "ALT_UP_HANDLE:;"
+                //reset alt key press
             "movl $0, (alt);"
-            "xorl %%edx, %%edx;"
+                //put ascii_val on buff
+            "movl (ascii_val), %%eax;"
+            "cld;"
+            "stosl;"
+                //reset asci_val
+            "movl $0, (ascii_val);"
+                //set result to 1
+            "movl $1, %%edx;"
+            //"xorl %%edx, %%edx;"
             "jmp EXIT;"
 
             // standard chars
             "STANDARD_CHAR_HANDLE:;"
-            // check if alt,ctrl and shift are NOT PRESSED
+
+            // none of the chars are pressed
             "xorl %%ecx, %%ecx;"
             "add (alt), %%ecx;"
             "add (ctrl), %%ecx;"
             "add (shift), %%ecx;"
             "cmp $0, %%ecx;"
-            // none of the chars are pressed
             "je LOWERCASE_CHAR_HANDLE;"
-            "cmp $1, (shift);"
+
             // check if shift is pressed
+            "cmp $1, (shift);"
             "je UPPERCASE_CHAR_HANDLE;"
+
+            // check if alt is pressed
+            "cmp $1, (alt);"
+            "je ALT_CHAR_HANDLE;"
+
+            // ?
             "jmp EXIT;"
+
 
 
             // put scancodes_lower + ax value in di
@@ -244,6 +261,12 @@ int process_scancode(int scancode, char *buffer)
             "stosl;"
             "jmp EXIT;"
 
+            "ALT_CHAR_HANDLE:;"
+            "imull $10, (ascii_val),  %%ecx;"
+            "addl %%eax, %%ecx;"
+            "movl %%ecx, (ascii_val);"
+            "movl $0, %%edx;"
+            "jmp EXIT;"
             // ===== end handlers =====
 
             //done
