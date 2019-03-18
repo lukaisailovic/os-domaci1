@@ -5,6 +5,7 @@
 #define MAX_SCANCODES 128
 #define MAX_MNEMONICS 16
 #define BUFFER_SIZE 128
+#define DEBUG 1
 
 static char scancodes_lower[MAX_SCANCODES];
 static char scancodes_upper[MAX_SCANCODES];
@@ -35,9 +36,14 @@ void load_config(const char *scancodes_filename, const char *mnemonic_filename)
 	}
 	len = fgets(scancodes_lower, MAX_SCANCODES, fd);
 	len = fgets(scancodes_upper, MAX_SCANCODES, fd);
-
-	printstr(scancodes_lower);
-	printstr(scancodes_upper);
+    // scancodes loading test
+	if(DEBUG){
+        newline();
+        printstr("SCANCODES TEST\n");
+        printstr(scancodes_lower);
+        printstr(scancodes_upper);
+        newline();
+	}
 
 	/*
 	Otvaranje i ucitavanje mnemonics
@@ -63,15 +69,17 @@ void load_config(const char *scancodes_filename, const char *mnemonic_filename)
 		len = fgets(mnemonics[i], BUFFER_SIZE, fd);
 	}
 
-	/*
-	Test
-
-	i = 0;
-	for(i; i < n; i++)
-	{
-		printstr(mnemonics[i]);
+	// mnemonics loading test
+	if(DEBUG){
+        newline();
+        printstr("MNEMONICS TEST\n");
+        i = 0;
+        for(i; i < n; i++)
+        {
+            printstr(mnemonics[i]);
+        }
+        newline();
 	}
-	*/
 
 
 

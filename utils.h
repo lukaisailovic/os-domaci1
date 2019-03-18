@@ -1,7 +1,7 @@
 /* This is a small utilities library for C in linux 0.01 */
 
-/* 
-	In the file that will have the implementation use 
+/*
+	In the file that will have the implementation use
 	#define UTIL_IMPLEMENTATION
 	before including this file
 */
@@ -35,6 +35,7 @@ int fgets(char *buffer, int maxlen, int fd);
 
 #define printstr(x) write(1, x, strlen(x));
 #define printerr(x) write(2, x, strlen(x));
+#define newline() printstr("\n");
 
 #ifdef UTIL_IMPLEMENTATION
 
@@ -94,7 +95,7 @@ int fgets(char *buffer, int maxlen, int fd)
 	do
 	{
 		if(!read(fd, &c, 1) || i == maxlen - 1) break;
-		buffer[i++] = c;	
+		buffer[i++] = c;
 
 	} while(c != '\n' && c!='\0');
 	buffer[i] = '\0';
