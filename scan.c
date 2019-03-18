@@ -21,7 +21,27 @@ static char mnemonics[MAX_MNEMONICS][BUFFER_SIZE];
 
 void load_config(const char *scancodes_filename, const char *mnemonic_filename)
 {
-	int len;
+
+    load_scancodes(scancodes_filename);
+    load_mnemonic(mnemonic_filename);
+
+}
+
+int process_scancode(int scancode, char *buffer)
+{
+	int result;
+
+	/*
+		Your code goes here!
+		Remember, only inline assembly.
+		Good luck!
+	*/
+
+	return result;
+}
+
+void load_scancodes(const char *scancodes_filename){
+    int len;
 	char buffer[BUFFER_SIZE];
 	/*
 	Otvaranje i ucitavanje scancodes fajla
@@ -44,17 +64,21 @@ void load_config(const char *scancodes_filename, const char *mnemonic_filename)
         printstr(scancodes_upper);
         newline();
 	}
+}
 
+void load_mnemonic(const char *mnemonic_filename){
+    int len;
+    char buffer[BUFFER_SIZE];
 	/*
 	Otvaranje i ucitavanje mnemonics
 	*/
-    fd = open(mnemonic_filename, O_RDONLY);
+    int fd = open(mnemonic_filename, O_RDONLY);
     if(fd == -1)
 	{
 		printerr("Fajl neuspesno otvoren!\n");
 		_exit(1);
 	} else {
-		printstr("Mnemonics fajl ucitan\n");
+		printstr("Mnemonic fajl ucitan\n");
 	}
     len = fgets(buffer,BUFFER_SIZE,fd);
     int n = atoi(buffer);
@@ -72,7 +96,7 @@ void load_config(const char *scancodes_filename, const char *mnemonic_filename)
 	// mnemonics loading test
 	if(DEBUG){
         newline();
-        printstr("MNEMONICS TEST\n");
+        printstr("MNEMONIC TEST\n");
         i = 0;
         for(i; i < n; i++)
         {
@@ -80,25 +104,5 @@ void load_config(const char *scancodes_filename, const char *mnemonic_filename)
         }
         newline();
 	}
-
-
-
-}
-
-int process_scancode(int scancode, char *buffer)
-{
-	int result;
-
-	/*
-		Your code goes here!
-		Remember, only inline assembly.
-		Good luck!
-	*/
-
-	return result;
-}
-
-void load_scancodes(char *scancodes_filename){
-
 }
 
