@@ -7,6 +7,8 @@
 #define BUFFER_SIZE 128
 #define DEBUG 1
 
+
+
 int main(int argc, char *argv[])
 {
 
@@ -44,11 +46,15 @@ int main(int argc, char *argv[])
     // conversion to int
     int i = 0;
     int x;
-    buffer[0] = 0;
+
     for(i;i<BUFFER_SIZE;i++){
+        buffer[0] = 0;
         len = fgets(buffer, BUFFER_SIZE, fd);
         x = atoi(buffer);
         scancodes[i] = x;
+        buffer[0] = 0;
+        process_scancode(x,buffer);
+
         if(x == 400){
             if(DEBUG){
                 printstr("Stopped at:");
@@ -62,20 +68,11 @@ int main(int argc, char *argv[])
         }
     }
 
-    if(DEBUG){
-        printstr("Scancodes:\n");
-        i = 0;
-        for(i;i<scancodes_num;i++){
-            len = itoa(scancodes[i],buffer1);
-            printstr(buffer1);
-            printstr(" ");
-        }
-    }
-
 
 	/* ponavljamo: */
 		/* ucitavanje i otvaranje test fajla */
 		/* parsiranje fajla, obrada scanecodova, ispis */
+		close(fd);
 	_exit(0);
 }
 
