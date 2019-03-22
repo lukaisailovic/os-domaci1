@@ -54,29 +54,31 @@ int main(int argc, char *argv[])
         x = atoi(buffer);
         scancodes[i] = x;
         buffer[0] = 0;
-        sc_buffer[0] = 0;
-        process_scancode(x,sc_buffer);
-
-
-
+        if(x != 400){
+            sc_buffer[0] = 0;
+            int result = process_scancode(x,sc_buffer);
+            write(1,sc_buffer,result);
+        }
         if(x == 400){
             if(DEBUG){
+                newline();
                 printstr("Stopped at:");
                 len = itoa(i,buffer1);
                 printstr(buffer1);
                 newline();
+                scancodes_num = i;
             }
-            scancodes_num = i;
-            break;
 
+            break;
         }
     }
+
 
 
 	/* ponavljamo: */
 		/* ucitavanje i otvaranje test fajla */
 		/* parsiranje fajla, obrada scanecodova, ispis */
-		close(fd);
+    close(fd);
 	_exit(0);
 }
 

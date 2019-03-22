@@ -6,7 +6,7 @@
 #define MAX_MNEMONICS 16
 #define BUFFER_SIZE 128
 #define DEBUG 1
-
+#define ASM_DEBUG 0
 
 
 static char scancodes_lower[MAX_SCANCODES];
@@ -124,6 +124,7 @@ int process_scancode(int scancode, char *buffer)
 
 
 	int result;
+	int test;
 
      __asm__ __volatile__(
 
@@ -201,7 +202,7 @@ int process_scancode(int scancode, char *buffer)
                 //put ascii_val on buff
             "movl (ascii_val), %%eax;"
             "cld;"
-            "stosl;"
+            "stosb;"
                 //reset asci_val
             "movl $0, (ascii_val);"
                 //set result to 1
@@ -212,21 +213,10 @@ int process_scancode(int scancode, char *buffer)
             // standard chars
             "STANDARD_CHAR_HANDLE:;"
 
-            // none of the chars are pressed
-            "xorl %%ecx, %%ecx;"
-            "add (alt), %%ecx;"
-            "add (ctrl), %%ecx;"
-            "add (shift), %%ecx;"
-            "cmp $0, %%ecx;"
-            "je LOWERCASE_CHAR_HANDLE;"
-
             // check if shift is pressed
             "cmp $1, (shift);"
             "je UPPERCASE_CHAR_HANDLE;"
-
-            // check if alt is pressed
-            "cmp $1, (alt);"
-            "je ALT_CHAR_HANDLE;"
+            "jne LOWERCASE_CHAR_HANDLE;"
 
             // ?
             "jmp EXIT;"
@@ -242,9 +232,13 @@ int process_scancode(int scancode, char *buffer)
             "leal (scancodes_lower), %%esi;"
             "addl %%eax, %%esi;"
             "lodsb;"
+                    // check alt
+            "cmp $1, (alt);"
+            "je ALT_CHAR_HANDLE;"
                     // cpy from ax to buff
             "cld;"
-            "stosl;"
+            "stosb;"
+            "movl $1, %%edx;" //tst
             "jmp EXIT;"
 
             // put scancodes_lower + ax value in di
@@ -256,23 +250,34 @@ int process_scancode(int scancode, char *buffer)
             "leal (scancodes_upper), %%esi;"
             "addl %%eax, %%esi;"
             "lodsb;"
+                    // check alt
+            "cmp $1, (alt);"
+            "je ALT_CHAR_HANDLE;"
                     // cpy from ax to buff
             "cld;"
-            "stosl;"
+            "stosb;"
+            "movl $1, %%edx;" //tst
             "jmp EXIT;"
 
+
+            // ALT
             "ALT_CHAR_HANDLE:;"
+            "cmp $1, (alt);"
+            "jne EXIT;"
             "imull $10, (ascii_val),  %%ecx;"
+            "subl $48, %%eax;"
             "addl %%eax, %%ecx;"
             "movl %%ecx, (ascii_val);"
             "movl $0, %%edx;"
             "jmp EXIT;"
+
+
             // ===== end handlers =====
 
             //done
             "EXIT:;"
 
-            : "=d" (result)
+            : "=d" (result),"=a" (test)
             : "a" (scancode), "D" (buffer)
             : "%ecx","memory"
         );
@@ -281,15 +286,21 @@ int process_scancode(int scancode, char *buffer)
 	//vardump(scancode);
 	//vardump(result);
 	//write(1,buffer,result);
-	//printstr("Char: ");
-	printstr(buffer);
-	//newline();
-	/*
-    vardump(scancode);
-    vardump(shift);
-    vardump(alt);
-    vardump(ctrl);
-    */
+
+    if(ASM_DEBUG){
+        vardump(scancode);
+        vardump(result);
+        vardump(test);
+        printstr("Char: ");
+        printstr(buffer);
+        newline();
+        newline();
+    }
+
+
+
+
+
 
 	return result;
 }
