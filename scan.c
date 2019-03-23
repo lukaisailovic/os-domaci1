@@ -328,16 +328,22 @@ int process_scancode(int scancode, char *buffer)
             // load row start address in si
 
             "movl (buffer_size), %%ecx;"
-            "rep movsb;"
+            "rep movsb;"    // cpy buffer size chars from si to di
 
-            "movl %%edi, %%esi;" // save buffer in si
-            "cld;"
-            "movb $10, %%al;"
+            "movb $10, %%bl;"
+
             "movl (buffer_size), %%ecx;"
-            "repne scasb;"
-            "subl $5, %%edi;"
+            "movl $0, %%edx;"
 
-            "movl $20, %%edx;"
+            "LOOK_NL:;"
+            "movl 0(%%esi,%%edx,1), %%eax;"
+            "cmpb %%bl, %%al;"
+            "je NEXT;"
+            "addl $1, %%edx;"
+            "loop LOOK_NL;"
+
+
+            //"movl $20, %%edx;"
                     // store value from ax in buffer
             "NEXT:;"
 
