@@ -14,6 +14,10 @@ static char scancodes_upper[MAX_SCANCODES];
 static char mnemonics[MAX_MNEMONICS][BUFFER_SIZE];
 
 
+int mnemonics_num = 0;
+int buffer_size = BUFFER_SIZE;
+int max_mnemonics = MAX_MNEMONICS;
+
 int shift = 0;
 int ctrl = 0;
 int alt = 0;
@@ -85,6 +89,7 @@ void load_mnemonic(const char *mnemonic_filename){
 		_exit(1);
 	}
 	int i = 0;
+	mnemonics_num = n;
 	for(i; i < n; i++)
 	{
 		len = fgets(mnemonics[i], BUFFER_SIZE, fd);
@@ -157,8 +162,9 @@ int process_scancode(int scancode, char *buffer)
             // ===== end special codes =====
 
             // ===== standard chars =====
-            "cmp (MAX_SCANCODES_C), %%eax;"
-            "jle STANDARD_CHAR_HANDLE;"
+            //"cmp (MAX_SCANCODES_C), %%eax;"
+            //"jle STANDARD_CHAR_HANDLE;"
+            "jmp STANDARD_CHAR_HANDLE;"
             // ===== end standard chars =====
 
             "jmp EXIT;"
@@ -235,9 +241,14 @@ int process_scancode(int scancode, char *buffer)
                     // check alt
             "cmp $1, (alt);"
             "je ALT_CHAR_HANDLE;"
+                    // check ctrl
+            "cmp $1, (ctrl);"
+            "je CTRL_CHAR_HANDLE;"
                     // cpy from ax to buff
             "cld;"
             "stosb;"
+
+
             "movl $1, %%edx;" //tst
             "jmp EXIT;"
 
@@ -253,9 +264,14 @@ int process_scancode(int scancode, char *buffer)
                     // check alt
             "cmp $1, (alt);"
             "je ALT_CHAR_HANDLE;"
+                    // check ctrl
+            "cmp $1, (ctrl);"
+            "je CTRL_CHAR_HANDLE;"
                     // cpy from ax to buff
             "cld;"
             "stosb;"
+
+
             "movl $1, %%edx;" //tst
             "jmp EXIT;"
 
@@ -271,6 +287,64 @@ int process_scancode(int scancode, char *buffer)
             "movl $0, %%edx;"
             "jmp EXIT;"
 
+            // CTRL
+            /*
+                val -> ax
+                ax == &mnemonics ?
+                loop (&mnemonics + max_char) mnemonics_num times
+                if true
+                loop until val != '\n'
+                store val in buffer
+            */
+            "CTRL_CHAR_HANDLE:;"
+            "cmp $1, (ctrl);"
+            "jne EXIT;"
+
+
+                // save val in bx
+            "movl %%eax, %%ebx;"
+               // load mnemonics
+            "leal (mnemonics), %%esi;"
+
+
+            "movl $0, %%edx;"
+            "movl (mnemonics_num), %%ecx;"
+            "COMPARE:;"
+            "movl 0(%%esi,%%edx,1), %%eax;"
+
+                    // perform cmp
+            "cmpb %%al,%%bl;"
+            "je FOUND;"
+
+            "addl $128, %%edx;"
+            "loop COMPARE;"
+            "movl $48, %%eax;"
+            "movl $1, %%edx;"
+            "jmp NEXT;"
+
+            "FOUND:;" // found start
+            "addl $2, %%edx;"
+            "leal 0(%%esi,%%edx,1), %%esi;"
+            // load row start address in si
+
+            "movl (buffer_size), %%ecx;"
+            "rep movsb;"
+
+            "movl %%edi, %%esi;" // save buffer in si
+            "cld;"
+            "movb $10, %%al;"
+            "movl (buffer_size), %%ecx;"
+            "repne scasb;"
+            "subl $5, %%edi;"
+
+            "movl $20, %%edx;"
+                    // store value from ax in buffer
+            "NEXT:;"
+
+            //"cld;"
+            //"stosb;"
+            //"movl $1, %%edx;"
+
 
             // ===== end handlers =====
 
@@ -279,7 +353,7 @@ int process_scancode(int scancode, char *buffer)
 
             : "=d" (result),"=a" (test)
             : "a" (scancode), "D" (buffer)
-            : "%ecx","memory"
+            : "%ecx","%ebx","memory"
         );
 
 
@@ -296,6 +370,7 @@ int process_scancode(int scancode, char *buffer)
         newline();
         newline();
     }
+
 
 
 
