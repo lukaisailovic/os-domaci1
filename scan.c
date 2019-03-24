@@ -5,7 +5,7 @@
 #define MAX_SCANCODES 128
 #define MAX_MNEMONICS 16
 #define BUFFER_SIZE 128
-#define DEBUG 1
+#define DEBUG 0
 #define ASM_DEBUG 0
 
 
@@ -329,23 +329,29 @@ int process_scancode(int scancode, char *buffer)
 
             "movl (buffer_size), %%ecx;"
             "rep movsb;"    // cpy buffer size chars from si to di
+            // di (buffer) now cointains whole row (si)
+            /*
+                Look for and return position of new line char
+            */
 
-            "movb $10, %%bl;"
 
-            "movl (buffer_size), %%ecx;"
+            "movl $12, %%ebx;"
             "movl $0, %%edx;"
-
-            "LOOK_NL:;"
+            "movl (buffer_size), %%ecx;"
+            "COMPARE_NL:;"
             "movl 0(%%esi,%%edx,1), %%eax;"
-            "cmpb %%bl, %%al;"
-            "je NEXT;"
+                    // perform cmp
+            "cmpb %%al,%%bl;"
+            "je EXIT;"
             "addl $1, %%edx;"
-            "loop LOOK_NL;"
+            "loop COMPARE_NL;"
 
 
-            //"movl $20, %%edx;"
-                    // store value from ax in buffer
             "NEXT:;"
+            "movl $126, %%edx;"
+
+
+
 
             //"cld;"
             //"stosb;"

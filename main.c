@@ -5,7 +5,7 @@
 
 
 #define BUFFER_SIZE 128
-#define DEBUG 1
+#define DEBUG 0
 
 
 
