@@ -327,29 +327,51 @@ int process_scancode(int scancode, char *buffer)
             "leal 0(%%esi,%%edx,1), %%esi;"
             // load row start address in si
 
+            /*
             "movl (buffer_size), %%ecx;"
             "rep movsb;"    // cpy buffer size chars from si to di
             // di (buffer) now cointains whole row (si)
-            /*
-                Look for and return position of new line char
-            */
+
+                //Look for and return position of new line char
+
+            "subl (buffer_size), %%esi;"
 
 
-            "movl $12, %%ebx;"
+            "movl $10, %%ebx;"
             "movl $0, %%edx;"
             "movl (buffer_size), %%ecx;"
             "COMPARE_NL:;"
+            //"addl %%edx, %%esi;"
+            "cld;"
+            "lodsl;"
             "movl 0(%%esi,%%edx,1), %%eax;"
                     // perform cmp
-            "cmpb %%al,%%bl;"
+            "cmpl %%eax,%%ebx;"
             "je EXIT;"
             "addl $1, %%edx;"
+
             "loop COMPARE_NL;"
+            */
+            "pushl %%esi;"
+            "xorl %%eax, %%eax;"
+            "movl $10, %%ebx;" // NL Char
+            //"mov $0, %%edx;"
+            "xorl %%edx, %%edx;"
+            "COPY_DI:;"
+            "cld;"
+            "lodsb;" // si --> ax
+            "cmpl %%eax, %%ebx;"
+            "je EXIT;"
+            "stosb;"
+            "cmpl (buffer_size), %%edx;"
+            "jge EXIT;"
+            "addl $1, %%esi;"
+            "addl $1, %%edx;"
+            "jmp COPY_DI;"
 
 
             "NEXT:;"
             "movl $126, %%edx;"
-
 
 
 
