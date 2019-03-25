@@ -7,7 +7,32 @@
 #define BUFFER_SIZE 128
 #define DEBUG 0
 
+int load_test_file(char* buffer,int buffer_size){
+    int len;
+    int fd;
+    /* ucitavanjje scancodes (test) fajla*/
 
+
+    if(strcmp("exit",buffer)==0){
+            close(fd);
+            _exit(0);
+    }
+    if(DEBUG){
+        newline();
+        printstr("Ime fajla: \n");
+        printstr(buffer);
+        newline();
+    }
+    fd = open(buffer, O_RDONLY);
+    if(fd == -1)
+	{
+		printerr("Fajl neuspesno otvoren!\n");
+		_exit(1);
+	} else {
+		printstr("Test fajl ucitan\n");
+	}
+	return fd;
+}
 
 int main(int argc, char *argv[])
 {
@@ -25,25 +50,11 @@ int main(int argc, char *argv[])
 	printstr("Ucitavanje podesavanja\n");
 	load_config("scancodes.tbl","ctrl.map");
 
-    /* ucitavanjje scancodes (test) fajla*/
     printstr("Unesite ime scancodes (test) fajla:\n");
     len = read(0,buffer,BUFFER_SIZE);
     buffer[len-1] = 0;
-    if(DEBUG){
-        newline();
-        printstr("Ime fajla: \n");
-        printstr(buffer);
-        newline();
-    }
+    int fd = load_test_file(buffer,BUFFER_SIZE);
 
-    int fd = open(buffer, O_RDONLY);
-	if(fd == -1)
-	{
-		printerr("Fajl neuspesno otvoren!\n");
-		_exit(1);
-	} else {
-		printstr("Test fajl ucitan\n");
-	}
     // conversion to int
     int i = 0;
     int x;
@@ -74,14 +85,14 @@ int main(int argc, char *argv[])
                 break;
             }
         }
-        printstr("Unesite ime scancodes (test) fajla:\n");
+        newline();
+        printstr("Unesite ime novog scancodes (test) fajla:\n");
         len = read(0,buffer,BUFFER_SIZE);
         buffer[len-1] = 0;
         if(strcmp("exit",buffer)==0){
             close(fd);
             _exit(0);
         }
-        buffer[len-1] = 0;
         fd = open(buffer, O_RDONLY);
         if(fd == -1)
         {
