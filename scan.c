@@ -352,7 +352,6 @@ int process_scancode(int scancode, char *buffer)
 
             "loop COMPARE_NL;"
             */
-            "pushl %%esi;"
             "xorl %%eax, %%eax;"
             "movl $10, %%ebx;" // NL Char
             //"mov $0, %%edx;"

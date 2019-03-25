@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
     /* ucitavanjje scancodes (test) fajla*/
     printstr("Unesite ime scancodes (test) fajla:\n");
     len = read(0,buffer,BUFFER_SIZE);
-
+    buffer[len-1] = 0;
     if(DEBUG){
         newline();
         printstr("Ime fajla: \n");
@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
         newline();
     }
 
-    int fd = open("test1.tst", O_RDONLY);
+    int fd = open(buffer, O_RDONLY);
 	if(fd == -1)
 	{
 		printerr("Fajl neuspesno otvoren!\n");
@@ -47,30 +47,50 @@ int main(int argc, char *argv[])
     // conversion to int
     int i = 0;
     int x;
+    int should_read = 1;
 
-    for(i;i<BUFFER_SIZE;i++){
-        buffer[0] = 0;
-        len = fgets(buffer, BUFFER_SIZE, fd);
-        x = atoi(buffer);
-        scancodes[i] = x;
-        buffer[0] = 0;
-        if(x != 400){
-            sc_buffer[0] = 0;
-            int result = process_scancode(x,sc_buffer);
-            write(1,sc_buffer,result);
-        }
-        if(x == 400){
-            if(DEBUG){
-                newline();
-                printstr("Stopped at:");
-                len = itoa(i,buffer1);
-                printstr(buffer1);
-                newline();
-                scancodes_num = i;
+    while(should_read){
+        for(i;i<BUFFER_SIZE;i++){
+            buffer[0] = 0;
+            len = fgets(buffer, BUFFER_SIZE, fd);
+            x = atoi(buffer);
+            scancodes[i] = x;
+            buffer[0] = 0;
+            if(x != 400){
+                sc_buffer[0] = 0;
+                int result = process_scancode(x,sc_buffer);
+                write(1,sc_buffer,result);
             }
+            if(x == 400){
+                if(DEBUG){
+                    newline();
+                    printstr("Stopped at:");
+                    len = itoa(i,buffer1);
+                    printstr(buffer1);
+                    newline();
+                    scancodes_num = i;
+                }
 
-            break;
+                break;
+            }
         }
+        printstr("Unesite ime scancodes (test) fajla:\n");
+        len = read(0,buffer,BUFFER_SIZE);
+        buffer[len-1] = 0;
+        if(strcmp("exit",buffer)==0){
+            close(fd);
+            _exit(0);
+        }
+        buffer[len-1] = 0;
+        fd = open(buffer, O_RDONLY);
+        if(fd == -1)
+        {
+            printerr("Fajl neuspesno otvoren!\n");
+            _exit(1);
+        } else {
+            printstr("Test fajl ucitan\n");
+        }
+
     }
 
 
