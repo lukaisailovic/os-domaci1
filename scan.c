@@ -352,19 +352,21 @@ int process_scancode(int scancode, char *buffer)
 
             "loop COMPARE_NL;"
             */
+
             "xorl %%eax, %%eax;"
             "movl $10, %%ebx;" // NL Char
             //"mov $0, %%edx;"
             "xorl %%edx, %%edx;"
+            "xorl %%ecx, %%ecx;" // for lodsb and stosb
             "COPY_DI:;"
             "cld;"
             "lodsb;" // si --> ax
             "cmpl %%eax, %%ebx;"
             "je EXIT;"
             "stosb;"
-            "cmpl (buffer_size), %%edx;"
+            "cmpl $64, %%edx;"
             "jge EXIT;"
-            "addl $1, %%esi;"
+            "incl %%ecx;"
             "addl $1, %%edx;"
             "jmp COPY_DI;"
 
